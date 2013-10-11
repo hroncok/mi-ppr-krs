@@ -1,6 +1,7 @@
 #include "board.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 
 Board::Board(int m_, int n_, int x, int q) {
 	m = m_ + 2*CORNER;
@@ -31,7 +32,7 @@ void Board::fill(int x, int q) {
 	}
 	
 	// Perform backmoves
-	for (int i = 0; i <= q-x; i++) {
+	for (int i = 0; i < q-x+1; i++) {
 		bool pin = false;
 		for (int x_ = 0; x_ < m; x_++) {
 			for (int y_ = 0; y_ < n; y_++) {
@@ -39,33 +40,33 @@ void Board::fill(int x, int q) {
 				for (int way = 0; way < 4; way++) {
 					switch (way) {
 						case NORTH:
-							if ((x_ > 1) && (is_on(x_-1,y_)) && (!is_on(x_-2,y_))) {
+							if ((x_ > 1) && (!is_on(x_-1,y_)) && (!is_on(x_-2,y_))) {
 								remove_from(x_,y_);
-								remove_from(x_-1,y_);
+								add_to(x_-1,y_);
 								add_to(x_-2,y_);
 								pin = true;
 							}
 							break;
 						case EAST:
-							if ((y_ <= n-2) && (is_on(x_,y_+1)) && (!is_on(x_,y_+2))) {
+							if ((y_ <= n-2) && (!is_on(x_,y_+1)) && (!is_on(x_,y_+2))) {
 								remove_from(x_,y_);
-								remove_from(x_,y_+1);
+								add_to(x_,y_+1);
 								add_to(x_,y_+2);
 								pin = true;
 							}
 							break;
 						case SOUTH:
-							if ((x_ <= m-2) && (is_on(x_+1,y_)) && (!is_on(x_+2,y_))) {
+							if ((x_ <= m-2) && (!is_on(x_+1,y_)) && (!is_on(x_+2,y_))) {
 								remove_from(x_,y_);
-								remove_from(x_+1,y_);
+								add_to(x_+1,y_);
 								add_to(x_+2,y_);
 								pin = true;
 							}
 							break;
 						default:
-							if ((y_ > 1) && (is_on(x_,y_-1)) && (!is_on(x_,y_-2))) {
+							if ((y_ > 1) && (!is_on(x_,y_-1)) && (!is_on(x_,y_-2))) {
 								remove_from(x_,y_);
-								remove_from(x_,y_-1);
+								add_to(x_,y_-1);
 								add_to(x_,y_-2);
 								pin = true;
 							}
@@ -86,11 +87,11 @@ Board::~Board() {
 
 bool Board::in_corner(int x, int y) {
 	return ((x < CORNER && y < CORNER) ||
-	   (x < CORNER && y > n-CORNER) ||
-	   (x > m-CORNER && y < CORNER) ||
-	   (x > m-CORNER && y > n-CORNER) ||
-	   (x > m) ||
-	   (y > n) ||
+	   (x < CORNER && y >= n-CORNER) ||
+	   (x >= m-CORNER && y < CORNER) ||
+	   (x >= m-CORNER && y >= n-CORNER) ||
+	   (x >= m) ||
+	   (y >= n) ||
 	   (x < 0) ||
 	   (y < 0));
 }
@@ -202,3 +203,14 @@ int Board::pins() {
 	return counter;
 }
 
+void Board::visualize() {
+	for (int x = 0; x < m; x++) {
+		std::cout << "|";
+		for (int y = 0; y < n; y++) {
+			if (is_on(x,y)) std::cout << "#";
+			else std::cout << " ";
+		}
+		std::cout << "|";
+		std::cout << std::endl;
+	}
+}

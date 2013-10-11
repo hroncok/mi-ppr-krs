@@ -23,6 +23,8 @@ class Board {
 	bool add_to(int x, int y);
 	/// Remove a pin pin given coordinates
 	bool remove_from(int x, int y);
+	/// Is in corner?
+	bool in_corner(int x, int y);
 public:
 	/// Constructor with size of the board and number of pins
 	Board(int m_, int n_, int x, int q);
@@ -34,10 +36,10 @@ public:
 	bool is_on(int x, int y);
 	/// Move a pin form given coordinates in a given direction
 	bool move(int x, int y, int direction);
-	/// Is in corner?
-	bool in_corner(int x, int y);
 	/// How many pins are there on the board
 	int pins();
+	/// Visualize in terminal
+	void visualize();
 };
 
 #endif
