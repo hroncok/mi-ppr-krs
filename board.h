@@ -11,10 +11,13 @@
 #define CORNER 2
 #define CORNERS CORNER*CORNER
 
+#include <string>
+
 class Board {
 	int * map;
 	int ints;
 	int m, n;
+	int numsize;
 	/// Initially fill the broad with pins
 	void fill(int x, int q);
 	/// Get a single number form coordinates
@@ -35,7 +38,7 @@ public:
 	/// Check is there is a pin on given coordinates
 	bool is_on(int x, int y);
 	/// Move a pin form given coordinates in a given direction
-	bool move(int x, int y, int direction);
+	std::string move(int x, int y, int direction);
 	/// How many pins are there on the board
 	int pins();
 	/// Visualize in terminal

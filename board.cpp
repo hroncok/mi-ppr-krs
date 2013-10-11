@@ -1,6 +1,7 @@
 #include "board.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <iostream>
 
 Board::Board(int m_, int n_, int x, int q) {
@@ -16,6 +17,14 @@ Board::Board(int m_, int n_, int x, int q) {
 		map[i] = 0;
 	}
 	fill(x,q);
+	
+	// Determine numsize
+	numsize = 0;
+	while (true) {
+		numsize++;
+		int capacity = pow(2,8*numsize);
+		if (capacity >= fields) break;
+	}
 }
 
 void Board::fill(int x, int q) {
@@ -155,42 +164,51 @@ Board::Board(const Board &b) {
 }
 
 
-bool Board::move(int x, int y, int direction) {
-	if (!is_on(x,y)) return false;
+std::string Board::move(int x, int y, int direction) {
+	if (!is_on(x,y)) return "";
+	std::string ret = "";
+	for (int i = 0; i < numsize; i++) ret +=""; 
+	int num = num_from_cords(x,y);
+	for (int i = numsize-1; i >= 0; i--) {
+		ret[i] = num % 256;
+		num /= 256;
+	}
 	switch (direction) {
 		case NORTH:
-			if (x < 2) return false;
-			if (!is_on(x-1,y)) return false;
-			if (is_on(x-2,y)) return false;
+			if (x < 2) return "";
+			if (!is_on(x-1,y)) return "";
+			if (is_on(x-2,y)) return "";
 			remove_from(x,y);
 			remove_from(x-1,y);
 			add_to(x-2,y);
-			return true;
+			break;
 		case EAST:
-			if (y > n-3) return false;
-			if (!is_on(x,y+1)) return false;
-			if (is_on(x,y+2)) return false;
+			if (y > n-3) return "";
+			if (!is_on(x,y+1)) return "";
+			if (is_on(x,y+2)) return "";
 			remove_from(x,y);
 			remove_from(x,y+1);
 			add_to(x,y+2);
-			return true;
+			break;
 		case SOUTH:
-			if (x > m-3) return false;
-			if (!is_on(x+1,y)) return false;
-			if (is_on(x+2,y)) return false;
+			if (x > m-3) return "";
+			if (!is_on(x+1,y)) return "";
+			if (is_on(x+2,y)) return "";
 			remove_from(x,y);
 			remove_from(x+1,y);
 			add_to(x+2,y);
-			return true;
+			break;
 		default:
-			if (y < 2) return false;
-			if (!is_on(x,y-1)) return false;
-			if (is_on(x,y-2)) return false;
+			if (y < 2) return "";
+			if (!is_on(x,y-1)) return "";
+			if (is_on(x,y-2)) return "";
 			remove_from(x,y);
 			remove_from(x,y-1);
 			add_to(x,y-2);
-			return true;
+			break;
 	}
+	ret[numsize] = direction;
+	return ret;
 }
 
 int Board::pins() {
