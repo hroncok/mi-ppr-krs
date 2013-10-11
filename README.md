@@ -1,4 +1,4 @@
-mi-prr-krs
+mi-ppr-krs
 ==========
 
-MI-PRR.2: Semestrálka KRS
+MI-PPR.2: Semestrálka KRS
