@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
+#include <time.h>
 
 Board::Board(int m_, int n_, int x, int q) {
 	m = m_ + 2*CORNER;
@@ -29,7 +30,8 @@ Board::Board(int m_, int n_, int x, int q) {
 
 void Board::fill(int x, int q) {
 	// Fill it with x "random" pins
-	for (int i = 0; i < x; i++) {
+        srand (time(NULL));	
+        for (int i = 0; i < x; i++) {
 		int vagon = rand() % ints;
 		int seat = rand() % CAPACITY;
 		int mask = 1 << seat;
@@ -167,12 +169,12 @@ Board::Board(const Board &b) {
 std::string Board::move(int x, int y, int direction) {
 	if (!is_on(x,y)) return "";
 	std::string ret = "";
-	for (int i = 0; i < numsize; i++) ret +=""; 
-	int num = num_from_cords(x,y);
-	for (int i = numsize-1; i >= 0; i--) {
-		ret[i] = num % 256;
-		num /= 256;
-	}
+//	for (int i = 0; i < numsize; i++) ret +=""; 
+//	int num = num_from_cords(x,y);
+//	for (int i = numsize-1; i >= 0; i--) {
+//		ret[i] = num % 256;
+//		num /= 256;
+//	}
 	switch (direction) {
 		case NORTH:
 			if (x < 2) return "";
@@ -207,7 +209,7 @@ std::string Board::move(int x, int y, int direction) {
 			add_to(x,y-2);
 			break;
 	}
-	ret[numsize] = direction;
+	//ret[numsize] = direction;
 	return ret;
 }
 
@@ -221,14 +223,38 @@ int Board::pins() {
 	return counter;
 }
 
-void Board::visualize() {
-	for (int x = 0; x < m; x++) {
-		std::cout << "|";
-		for (int y = 0; y < n; y++) {
-			if (is_on(x,y)) std::cout << "#";
-			else std::cout << " ";
-		}
-		std::cout << "|";
-		std::cout << std::endl;
-	}
+void Board::visualize() {                      
+        // new visualizer
+        for (int i = 0; i < m+2; i++) {
+            for (int j = 0; j < n+2; j++) {
+                if ((i==0 || i==m+1 || j==0 || j==n+1) || 
+                    ((i<3 || i>m-2) && (j<3 || j>n-2))) {
+                        std::cout << "|";
+                }                            
+                else if (is_on(i-1,j-1)) { std::cout << "#"; }
+                else std::cout << " ";
+            }
+            std::cout << std::endl;
+        }
+        
+//        // old visualizer
+//        std::cout << std::endl << std::endl;        
+//	for (int x = 0; x < m; x++) {
+//		std::cout << "|";
+//		for (int y = 0; y < n; y++) {
+//			if (is_on(x,y)) std::cout << "#";
+//			else std::cout << " ";
+//		}
+//		std::cout << "|";
+//		std::cout << std::endl;
+//	}
+}
+
+int Board::getHeight() {
+   return this->m; 
+}
+
+
+int Board::getWidth() {
+    return this->n;
 }

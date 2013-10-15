@@ -43,6 +43,8 @@ public:
 	int pins();
 	/// Visualize in terminal
 	void visualize();
+        int getHeight();
+        int getWidth();
 };
 
 #endif
