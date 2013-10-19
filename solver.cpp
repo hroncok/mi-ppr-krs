@@ -1,39 +1,40 @@
 #include "solver.h"
+#include <iostream>
 
-Solver::Solver() {
-}
-
-State* Solver::dfsSolve(Board& board) {
+State* Solver::dfsSolve(const Board& board) {
     this->currentBest = NULL;
     dfsStack.push(new State(board)); // create initial state
 
     while (!(this->dfsStack.empty())) {
         State* curSt = this->dfsStack.top();
         this->dfsStack.pop();
+        //std::cout << "pop " << dfsStack.size() << std::endl; //debug
 
-        if (pushPossibleMoves(curSt)) {
+        if (pushPossibleMoves(*curSt)) {
             delete curSt;
-        } else if (checkSolution(curSt)) {
-            return this->currentBest;
+        } else if (isSolutionBest(curSt->remains())) {
+            replaceBest(curSt);
+            if (curSt->remains() == 1) break;
         }
     }
-    return this->currentBest;
+    return new State(*this->currentBest);
 }
 
-bool Solver::pushPossibleMoves(State* curSt) {
+bool Solver::pushPossibleMoves(State& curSt) {
     bool pushed = false;
-    int height = curSt->getBoard()->getHeight();
-    int width = curSt->getBoard()->getWidth();
+    int height = curSt.getBoard().getHeight();
+    int width = curSt.getBoard().getWidth();
 
     for (int x = 0; x < height; x++) {
         for (int y = 0; y < width; y++) {
-            if (curSt->getBoard()->is_on(x, y)) {
-                bool* moves = getPossibleMoves(*(curSt->getBoard()), x, y);
+            if (curSt.getBoard().is_on(x, y)) {
+                bool* moves = getPossibleMoves(curSt.getBoard(), x, y);
                 for (int i = 0; i < 4; i++) {
                     if (moves[i]) {
-                        State* newSt = new State(*curSt);
+                        State* newSt = new State(curSt);
                         newSt->makeMove(x, y, i);
                         this->dfsStack.push(newSt);
+                        //std::cout << "push " << dfsStack.size() << std::endl; //debug
                     }
                 }
                 delete moves;
@@ -43,7 +44,7 @@ bool Solver::pushPossibleMoves(State* curSt) {
     return pushed;
 }
 
-bool* Solver::getPossibleMoves(Board& board, int x, int y) {
+bool* Solver::getPossibleMoves(Board& board, int x, int y) const {
     bool* moves = new bool[4];
     std::fill(moves, moves + sizeof (moves), false);
 
@@ -55,18 +56,18 @@ bool* Solver::getPossibleMoves(Board& board, int x, int y) {
     return moves;
 }
 
-bool Solver::checkSolution(State* curSt) {
+bool Solver::isSolutionBest(int remaining) const {
     // there is no move possible   
-    if (this->currentBest == NULL) {
-        this->currentBest = curSt;
-    } else if ((curSt->remains()) < (this->currentBest->remains())) {
-        delete this->currentBest;
-        this->currentBest = curSt;
-    } else {
-        delete curSt;
-    }
+    if (this->currentBest == NULL) return true;
+    if ((remaining) < (this->currentBest->remains())) return true;
 
-    return (this->currentBest->remains() == 1);
+    return false;
+}
+
+void Solver::replaceBest(State* newBest) {
+
+    if (this->currentBest) delete this->currentBest;
+    this->currentBest = newBest;
 }
 
 Solver::~Solver() {

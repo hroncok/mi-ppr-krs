@@ -14,7 +14,8 @@ bool checkArgs(int argc, char** argv) {
 }
 
 /// visualize all moves of the solution (result)
-void visualizeResult(Board& initBoard, std::vector<unsigned char>& moves) {
+void visualizeResult(Board& initBoard, const std::vector<unsigned char>& moves) {
+    Board board(initBoard);
     int moveCount = moves.size() / 3;
     std::cout << "Visualized moves: " << std::endl;
     for (int i = 0; i < (moveCount * 3) - 2; i += 3) {
@@ -22,15 +23,15 @@ void visualizeResult(Board& initBoard, std::vector<unsigned char>& moves) {
         int y = moves[i + 1];
         int dir = moves[i + 2];
 
-        initBoard.visualize();
+        board.visualize();
         std::cout << std::endl;
-        initBoard.move(x, y, dir);
+        board.move(x, y, dir);
     }
-    initBoard.visualize();
+    board.visualize();
 }
 
 /// print all moves of the solution in the form of "[x,y] -> direction code"
-void printResult(std::vector<unsigned char>& moves) {
+void printResult(const std::vector<unsigned char>& moves) {
     int moveCount = moves.size() / 3;
     std::cout << "Total moves done: " << moveCount << std::endl;
     for (int i = 0; i < (moveCount * 3) - 2; i += 3) {
@@ -54,13 +55,14 @@ int main(int argc, char** argv) {
     Solver player; // create a player (solver)
     State* result = player.dfsSolve(game); // play the game
     std::cout << std::endl << "Final state:" << std::endl;
-    result->getBoard()->visualize();
+    result->getBoard().visualize();
 
     std::cout << std::endl;
-    printResult(*(result->getMoves())); 
+    printResult(result->getMoves());
     //std::cout << std::endl;
-    //visualizeResult(game,*(result->getMoves()));
-    
+    //visualizeResult(game,result->getMoves());
+
+    delete result;
     return 0;
 }
 

@@ -6,34 +6,34 @@
 
 /// Class State represents one concrete position during the game
 /// It is defined by the board state and moves done
+
 class State {
 public:
-    // create inital (first) state of the game
+    // create initial (first) state of the game
     // no moves have been done yet
-    State(Board& board);
-    
+    State(const Board& oldBoard) : board(oldBoard) {
+    }
+
     /// create new State as a copy of another State
     /// All states (during the game) are supposed to be created this way
-    State(State& oldState);
-    
-    // destroy the state
-    ~State();
-    
+    State(const State& oldState) : board(oldState.board), moveSeq(oldState.moveSeq) {
+    }
+
     // update state with a new move
     bool makeMove(int x, int y, int dir);
-    
+
     // return count of pins remaining on the board
     int remains();
-    
+
     // return vector with all done moves
-    std::vector<unsigned char>* getMoves();
+    const std::vector<unsigned char>& getMoves() const;
 
     // return current state of the board
-    Board* getBoard();
-    
+    Board& getBoard();
+
 private:
-    std::vector<unsigned char>* moveSeq;
-    Board* board;
+    Board board;
+    std::vector<unsigned char> moveSeq;
 
 };
 

@@ -8,18 +8,19 @@
 class Solver {
 public:
     /// create new solver
-    Solver();
-    
+    Solver() {}
+
     /// destroy solver
     ~Solver();
-    
+
     /// main method - Solve the board using DFS
-    State* dfsSolve(Board& board);
+    State* dfsSolve(const Board& board);
 
 private:
-    bool pushPossibleMoves(State* curSt);
-    bool* getPossibleMoves(Board& board, int x, int y);
-    bool checkSolution(State* curSt);
+    bool pushPossibleMoves(State& curSt);
+    bool* getPossibleMoves(Board& board, int x, int y) const;
+    bool isSolutionBest(int remaining) const;
+    void replaceBest(State* curSt);
     State* currentBest;
     std::stack<State*> dfsStack;
 };
