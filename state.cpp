@@ -1,8 +1,7 @@
 #include "state.h"
 
-bool State::makeMove(int x, int y, int dir) {
-    if (this->remains() <= 1) return false;
-    this->board.move(x, y, dir);
+bool State::makeMove(int x, int y, int dir) {    
+    if (!this->board.makeMove(x,y,dir)) return false;
 
     this->moveSeq.push_back(x);
     this->moveSeq.push_back(y);
@@ -11,15 +10,15 @@ bool State::makeMove(int x, int y, int dir) {
     return true;
 }
 
-int State::remains() {
-    return this->board.pins();
+int State::remains() const {
+    return this->board.getPinCount();
 }
 
 const std::vector<unsigned char>& State::getMoves() const {
     return this->moveSeq;
 }
 
-Board& State::getBoard() {
+const Board& State::getBoard() const {
     return this->board;
 }
 

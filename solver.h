@@ -17,8 +17,7 @@ public:
     State* dfsSolve(const Board& board);
 
 private:
-    bool pushPossibleMoves(State& curSt);
-    bool* getPossibleMoves(Board& board, int x, int y) const;
+    bool pushPossibleMoves(State& curSt);    
     bool isSolutionBest(int remaining) const;
     void replaceBest(State* curSt);
     State* currentBest;

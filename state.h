@@ -6,7 +6,6 @@
 
 /// Class State represents one concrete position during the game
 /// It is defined by the board state and moves done
-
 class State {
 public:
     // create initial (first) state of the game
@@ -23,13 +22,13 @@ public:
     bool makeMove(int x, int y, int dir);
 
     // return count of pins remaining on the board
-    int remains();
+    int remains() const;
 
     // return vector with all done moves
     const std::vector<unsigned char>& getMoves() const;
 
     // return current state of the board
-    Board& getBoard();
+    const Board& getBoard() const;
 
 private:
     Board board;

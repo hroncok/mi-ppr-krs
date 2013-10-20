@@ -1,20 +1,15 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <string>
 #include "board.h"
 #include "solver.h"
 #include "state.h"
 
-/// Check if arguments are correct, not completed
-bool checkArgs(int argc, char** argv) {
-    if (argc != 4) return false;
-    // perform all necessary argument checks
-    // ...
-    return true;
-}
+
 
 /// visualize all moves of the solution (result)
-void visualizeResult(Board& initBoard, const std::vector<unsigned char>& moves) {
+void visualizeResult(const Board& initBoard, const std::vector<unsigned char>& moves) {
     Board board(initBoard);
     int moveCount = moves.size() / 3;
     std::cout << "Visualized moves: " << std::endl;
@@ -25,7 +20,7 @@ void visualizeResult(Board& initBoard, const std::vector<unsigned char>& moves) 
 
         board.visualize();
         std::cout << std::endl;
-        board.move(x, y, dir);
+        board.makeMove(x, y, dir);
     }
     board.visualize();
 }
@@ -39,16 +34,39 @@ void printResult(const std::vector<unsigned char>& moves) {
         int y = moves[i + 1];
         int dir = moves[i + 2];
 
-        std::cout << "[" << x << "," << y << "] -> " << dir << std::endl;
+        std::string dirStr;
+        switch (dir) {
+            case NORTH:
+                dirStr = "UP";
+                break;
+            case EAST:
+                dirStr = "RIGHT";
+                break;
+            case SOUTH:
+                dirStr = "DOWN";
+                break;
+            case WEST:
+                dirStr = "LEFT";
+                break;
+            default:
+                dirStr = "ERR";
+                break;
+        }
+        std::cout << "[" << x << "," << y << "] -> " << dirStr << std::endl;
     }
-
 }
 
 int main(int argc, char** argv) {
-    //if (checkArgs == false) return 1;
-    //Board game(argv[0], argv[1], argv[2], argv[3]);
+    if (argc != 5) {
+        std::cerr << "Invalid number of arguments" << std::endl;
+        exit(1);
+    }
+    int m = atoi(argv[1]);
+    int n = atoi(argv[2]);
+    int x = atoi(argv[3]);
+    int q = atoi(argv[4]);
 
-    Board game(5, 5, 10, 20); // create sample game
+    Board game(m, n, x, q); // create sample game
     std::cout << "Initial state:" << std::endl;
     game.visualize();
 
