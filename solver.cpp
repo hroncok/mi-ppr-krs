@@ -45,9 +45,11 @@ bool Solver::pushPossibleMoves(State& curSt) {
 
 bool Solver::isSolutionBest(int remaining) const {
     // there is no move possible   
+    #ifdef DEBUG
+    std::cout << "endbranch: " << remaining << std::endl;
+    #endif
     if (this->currentBest == NULL) return true;
     if ((remaining) < (this->currentBest->remains())) return true;
-
     return false;
 }
 
