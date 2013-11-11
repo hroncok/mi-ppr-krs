@@ -11,25 +11,31 @@
 
 #define MAP_LEN 8
 
+///Class represents current playboard
 class Board {
 private:
-    unsigned char* map;
+    unsigned char* map; //pointer to bitmaps
     int height;
     int width;
-    int pins;
-    int mapVagons;
+    int pins; //current number of remaining pins
+    int mapVagons; //number of bitmap-vagons
     
+    /// True if all parameters are correct
     bool checkParams(int m, int n, int x, int q) const;
     
     /// Initially fill the board with pins
     void fill(int x, int q);
     
+    /// Place count pins randomly on the board
     void fillRandom(int count);
     
+    /// Place xCount pins randomly, then make bCount backmoves
     int fillCorrect(int xCount, int bCount);
     
+    /// True if there is a pin at [x,y]
     bool isOnBoard(int x, int y) const;
     
+    /// Get sequential number of [x.y]
     int getMapIndex(int x, int y) const;
        
     /// Place a pin on given coordinates
@@ -46,6 +52,9 @@ public:
     
     /// Constructor with another board
     Board(const Board& oldBoard);
+    
+    /// Constructor with serialized Board
+    Board(const unsigned char* serMap);
     
     /// Destructor
     ~Board();
@@ -64,9 +73,14 @@ public:
     /// How many pins are there on the board
     int getPinCount() const;
     
+    /// Get height of the board
     int getHeight() const;
     
+    /// Get width of the board
     int getWidth() const;
+    
+    /// Get serialized board (byte array)
+    unsigned char* getSerializedBoard() const;
 };
 
 #endif

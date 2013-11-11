@@ -8,31 +8,45 @@
 /// It is defined by the board state and moves done
 class State {
 public:
-    // create initial (first) state of the game
-    // no moves have been done yet
+    /// Create initial (first) state of the game
+    /// No moves have been done yet
     State(const Board& oldBoard) : board(oldBoard) {
     }
 
-    /// create new State as a copy of another State
-    /// All states (during the game) are supposed to be created this way
+    /// Create new State as a copy of another State
+    /// After creation, move is done by makeMove(x,y)
+    /// Almost all States are supposed to be created this way (excluding initial and sent states)
     State(const State& oldState) : board(oldState.board), moveSeq(oldState.moveSeq) {
     }
 
-    // update state with a new move
+    /// Create new State from serialized moves
+    /// Deserializes moves, makes all these moves on copied init board
+    /// All states received from another processor are supposed to be created this way
+    State(const Board& initBoard, const unsigned char* serMoves);
+    
+
+    /// Update state with a new move
     bool makeMove(int x, int y, int dir);
 
-    // return count of pins remaining on the board
+    /// Get count of pins remaining on the board
     int remains() const;
 
-    // return vector with all done moves
+    /// Get vector of bytes with all done moves
+    /// vector looks like this:
+    /// (x1),(y1),(dir1),(x2),(y2),(dir2), ...
     const std::vector<unsigned char>& getMoves() const;
+    
+    /// Get serialized vector of moves in the form of byte array
+    /// serialized array looks like this:
+    /// (size of this array),(x1),(y1),(dir1),(x2),(y2),(dir2), ...
+    unsigned char* getSerializedMoves() const;
 
-    // return current state of the board
+    /// Get current board
     const Board& getBoard() const;
 
 private:
-    Board board;
-    std::vector<unsigned char> moveSeq;
+    Board board; //current board
+    std::vector<unsigned char> moveSeq; //vector of moves
 
 };
 

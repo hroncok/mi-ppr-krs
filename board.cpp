@@ -1,7 +1,10 @@
 #include "board.h"
+#include "logger.h"
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <mpi.h>
 
 bool Board::checkParams(int m, int n, int x, int q) const {
     if ((m < 3) || (m < n)) return false;
@@ -18,7 +21,7 @@ bool Board::checkParams(int m, int n, int x, int q) const {
     return true;
 }
 
-void Board::fill(int xCount, int qCount) {    
+void Board::fill(int xCount, int qCount) {
     srand(time(NULL));
     if (xCount == 0) {
         fillRandom(qCount);
@@ -162,8 +165,9 @@ bool Board::removeFrom(int x, int y) {
 }
 
 Board::Board(int m, int n, int x, int q) {
-    if (!checkParams(m, n, x, q)) {
-        std::cerr << "invalid arguments" << std::endl;
+    if (!checkParams(m, n, x, q)) {        
+        (*Logger::getInstance()) << "invalid arguments\n";   
+        MPI_Finalize();
         exit(1);
     }
 
@@ -185,12 +189,24 @@ Board::Board(int m, int n, int x, int q) {
 Board::Board(const Board &oldBoard) {
     this->height = oldBoard.height;
     this->width = oldBoard.width;
-    this->mapVagons = oldBoard.mapVagons;
     this->pins = oldBoard.pins;
+    this->mapVagons = oldBoard.mapVagons;
 
     this->map = new unsigned char[mapVagons];
     for (int i = 0; i < mapVagons; i++) {
         this->map[i] = oldBoard.map[i];
+    }
+}
+
+Board::Board(const unsigned char* serMap) {
+    this->height = serMap[0];
+    this->width = serMap[1];
+    this->pins = serMap[2];
+    this->mapVagons = serMap[3];
+
+    this->map = new unsigned char[this->mapVagons];
+    for (int i = 0; i < this->mapVagons; i++) {
+        this->map[i] = serMap[i + 4];
     }
 }
 
@@ -269,16 +285,20 @@ bool Board::isPossibleMove(int x, int y, int direction) const {
 }
 
 void Board::visualize() const {
+    std::string buf = "";
+
     for (int x = -1; x < height + 1; x++) {
         for (int y = -1; y < width + 1; y++) {
             if (!isOnBoard(x, y)) {
-                std::cout << "|";
+                buf += "|";
             } else if (isPinOn(x, y)) {
-                std::cout << "#";
-            } else std::cout << " ";
+                buf += "#";
+            } else buf += " ";
         }
-        std::cout << std::endl;
+        buf+="\n";
     }
+    
+    (*Logger::getInstance()) << buf;    
 }
 
 int Board::getPinCount() const {
@@ -291,4 +311,19 @@ int Board::getHeight() const {
 
 int Board::getWidth() const {
     return this->width;
+}
+
+unsigned char* Board::getSerializedBoard() const {
+    unsigned char* serMap = new unsigned char[this->mapVagons + 4];
+
+    serMap[0] = this->height;
+    serMap[1] = this->width;
+    serMap[2] = this->pins;
+    serMap[3] = this->mapVagons;
+
+    for (int i = 0; i < this->mapVagons; i++) {
+        serMap[i + 4 ] = this->map[i];
+    }
+
+    return serMap;
 }
