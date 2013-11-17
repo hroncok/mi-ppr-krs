@@ -45,13 +45,17 @@ State* Solver::Solve() {
 void Solver::initMaster() {
     dfsStack.push_back(new State(initBoard)); // create and push initial state
 
-    (*log) << pID << ": computation started\n"; //DEBUG
+#ifdef DEBUG
+    (*log) << pID << ": computation started\n";
+#endif
     while ((((int) dfsStack.size()) < pCount) && (!dfsStack.empty())) {
         dfsExpand();
     }
 
     if (dfsStack.empty()) {
-        (*log) << pID << ": there is not enough work for other processes (empty stack)\n"; //DEBUG
+#ifdef DEBUG
+        (*log) << pID << ": there is not enough work for other processes (empty stack)\n";
+#endif
         finishParDfs();
     } else {
         for (int i = 1; i < pCount; i++) trySendWork(i); //send work to all other processors
@@ -59,14 +63,18 @@ void Solver::initMaster() {
 }
 
 void Solver::initSlave() {
-    (*log) << pID << ": board received, waiting for some work\n"; //DEBUG
+#ifdef DEBUG
+    (*log) << pID << ": board received, waiting for some work\n";
+#endif
     while (dfsStack.empty()) { //waiting for work from the master
         tryReceiveMessage(true);
     }
 }
 
 void Solver::procActive() {
-    (*log) << pID << ": processor has became active\n"; //DEBUG
+#ifdef DEBUG
+    (*log) << pID << ": processor has became active\n";
+#endif
     int counter = 1;
 
     while (!dfsStack.empty()) {
@@ -80,7 +88,9 @@ void Solver::procActive() {
         dfsExpand(); //one step (expansion) of DFS
         if ((currentBest) && (currentBest->remains() == 1)) {
             //if i have found solution with 1 pin remaining                
-            (*log) << pID << ": hooray, found the best possible solution (1 pin remaining)\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": hooray, found the best possible solution (1 pin remaining)\n";
+#endif
             finishParDfs(); //send finish request to master (if i am slave) or to all slaves (if i am master)
             return;
         }
@@ -88,18 +98,24 @@ void Solver::procActive() {
 }
 
 void Solver::procIdle() {
-    (*log) << pID << ": processor became idle\n"; //DEBUG
+#ifdef DEBUG
+    (*log) << pID << ": processor became idle\n";
+#endif
     this->color = COL_WHITE; //all idle processors become white
     
     if (holdingToken) { //(re)send token
-        (*log) << pID << ": sending white token\n"; //DEBUG
+#ifdef DEBUG
+        (*log) << pID << ": sending white token\n";
+#endif
         // if master: start a new round with white token, if slave: send white token (black would be resend immediately after receiving)
         MPI_Send(&color, 1, MPI_UNSIGNED_CHAR, (pID + 1) % pCount, MSG_TOKEN, MPI_COMM_WORLD); //message is only 1 byte long (color)
         holdingToken = false;
     }
 
     // ask for next work
-    (*log) << pID << ": asking proc " << donorID << " for the next work\n"; //DEBUG
+#ifdef DEBUG
+    (*log) << pID << ": asking proc " << donorID << " for the next work\n";
+#endif
     MPI_Send(NULL, 0, MPI_UNSIGNED_CHAR, this->donorID, MSG_WORK_REQUEST, MPI_COMM_WORLD); //empty message (request only)
     donorID = (donorID + 1) % pCount; //set the next potential donor
     if (donorID == pID) donorID = (donorID + 1) % pCount; //i cannot deal work to myself
@@ -189,38 +205,52 @@ bool Solver::tryReceiveMessage(bool blocking, int mesTag, int mesSource) {
     State* newSt;
     switch (status.MPI_TAG) {
         case MSG_WORK_REQUEST:
-            (*log) << pID << ": received work request from proc " << status.MPI_SOURCE << "\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": received work request from proc " << status.MPI_SOURCE << "\n";
+#endif
             trySendWork(status.MPI_SOURCE); //send requested work or work-denial message
             break;
         case MSG_INCOMING_WORK:
-            (*log) << pID << ": received new work from proc " << status.MPI_SOURCE << "\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": received new work from proc " << status.MPI_SOURCE << "\n";
+#endif
             newSt = new State(initBoard, buf); //deserialize received moves (by appropriate State constructor)
             dfsStack.push_front(newSt); //push received state on stack
             break;
         case MSG_WORK_DENIAL:
-            (*log) << pID << ": received work denial from proc " << status.MPI_SOURCE << "\n"; //DEBUG
-            (*log) << pID << ": asking proc " << donorID << " for the next work\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": received work denial from proc " << status.MPI_SOURCE << "\n";
+            (*log) << pID << ": asking proc " << donorID << " for the next work\n";
+#endif
             MPI_Send(NULL, 0, MPI_UNSIGNED_CHAR, donorID, MSG_WORK_REQUEST, MPI_COMM_WORLD); //ask again someone else
             donorID = (donorID + 1) % pCount; //set the next potential donor
             if (donorID == pID) donorID = (donorID + 1) % pCount; //i cannot deal work to myself
             break;
         case MSG_TOKEN:
-            if (buf[0] == 0) (*log) << pID << ": received white token\n"; //DEBUG
+#ifdef DEBUG
+            if (buf[0] == 0) (*log) << pID << ": received white token\n";
             else (*log) << pID << ": received black token\n";
+#endif
             processToken(buf[0]); //resend or save the token (or finish)
             break;
         case MSG_FINISH:
-            (*log) << pID << ": received finish request from proc " << status.MPI_SOURCE << "\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": received finish request from proc " << status.MPI_SOURCE << "\n";
+#endif
             finishParDfs(); //send finish request to master (if i am slave) or to all slaves (if i am master)
             break;
         case MSG_RESULT:
-            (*log) << pID << ": received result from proc " << status.MPI_SOURCE << "\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": received result from proc " << status.MPI_SOURCE << "\n";
+#endif
             //only master will receive results (after finish request)
             checkResult(buf); //check if the received result is better than local best
             break;
         default:
             //ignore
-            (*log) << pID << "; received unknown message from proc " << status.MPI_SOURCE << "\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << "; received unknown message from proc " << status.MPI_SOURCE << "\n";
+#endif
             break;
     }
     if (buf) delete[] buf; //delete the allocated buffer
@@ -233,7 +263,9 @@ bool Solver::trySendWork(int dest) {
 
     if ((this->dfsStack.size()) < 2) {
         //i have not enough work to send
-        (*log) << pID << ": sending work denial to proc " << dest << " (" << dfsStack.size() << " items on stack)\n"; //DEBUG
+#ifdef DEBUG
+        (*log) << pID << ": sending work denial to proc " << dest << " (" << dfsStack.size() << " items on stack)\n";
+#endif
         MPI_Send(NULL, 0, MPI_UNSIGNED_CHAR, dest, MSG_WORK_DENIAL, MPI_COMM_WORLD); //empty message, just work denial
         return false;
     }
@@ -244,7 +276,9 @@ bool Solver::trySendWork(int dest) {
     this->dfsStack.pop_front(); //remove state from the stack
 
 
-    (*log) << pID << ": sending new work to proc " << dest << " (" << dfsStack.size() << " items on stack)\n"; //DEBUG
+#ifdef DEBUG
+    (*log) << pID << ": sending new work to proc " << dest << " (" << dfsStack.size() << " items on stack)\n";
+#endif
     MPI_Send(serMoves, serMoves[0], MPI_UNSIGNED_CHAR, dest, MSG_INCOMING_WORK, MPI_COMM_WORLD); //send the work
 
     //if the rank of the destination processor is lower than mine, change color to black
@@ -260,7 +294,9 @@ void Solver::finishParDfs() {
         finished = true;
         for (int i = 1; i < pCount; i++) {
             // send finish request to all processors
-            (*log) << pID << ": sending finish request to proc " << i << "\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": sending finish request to proc " << i << "\n";
+#endif
             MPI_Send(NULL, 0, MPI_UNSIGNED_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
         }
 
@@ -271,17 +307,23 @@ void Solver::finishParDfs() {
 
     } else { //slave
         // send finish request to the master
-        (*log) << pID << ": sending finish request to proc 0\n"; //DEBUG
+#ifdef DEBUG
+        (*log) << pID << ": sending finish request to proc 0\n";
+#endif
         MPI_Send(NULL, 0, MPI_UNSIGNED_CHAR, 0, MSG_FINISH, MPI_COMM_WORLD);
         if (currentBest) {
             //send master also the result (local best)
             unsigned char* buf = currentBest->getSerializedMoves(); //get serialized result (local best)
-            (*log) << pID << ": sending result to proc 0 (" << currentBest->remains() << " pins remaining)\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": sending result to proc 0 (" << currentBest->remains() << " pins remaining)\n";
+#endif
             MPI_Send(buf, buf[0], MPI_UNSIGNED_CHAR, 0, MSG_RESULT, MPI_COMM_WORLD);
             delete[] buf;
         } else {
             //I don't have any local solution, send master "empty result" message
-            (*log) << pID << ": sending empty result (i have not found any) to proc 0\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": sending empty result (i have not found any) to proc 0\n";
+#endif
             MPI_Send(NULL, 0, MPI_UNSIGNED_CHAR, 0, MSG_RESULT, MPI_COMM_WORLD);
         }
 
@@ -316,7 +358,9 @@ void Solver::processToken(unsigned char tokColor) {
         } else if (dfsStack.empty()) { //tokColor == COL_BLACK
             // inactive master received black token -> start new round with white token     
             unsigned char tokCol = COL_WHITE;
-            (*log) << pID << ": sending white token\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": sending white token\n";
+#endif
             MPI_Send(&tokCol, 1, MPI_UNSIGNED_CHAR, (pID + 1) % pCount, MSG_TOKEN, MPI_COMM_WORLD);
             holdingToken = false;
         }
@@ -328,13 +372,17 @@ void Solver::processToken(unsigned char tokColor) {
             // slave is black or received black token -> resend black token immediately
             // token cannot become white, this round won't be the end
             unsigned char tokCol = COL_BLACK;
-            (*log) << pID << ": sending black token\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": sending black token\n";
+#endif
             MPI_Send(&tokCol, 1, MPI_UNSIGNED_CHAR, (pID + 1) % pCount, MSG_TOKEN, MPI_COMM_WORLD);
             holdingToken = false;
         } else if (dfsStack.empty()) { // tokColor == COL_WHITE && this->color == COL_WHITE
             // inactive white slave received white token -> resend white token immediately
             unsigned char tokCol = COL_WHITE;
-            (*log) << pID << ": sending white token\n"; //DEBUG
+#ifdef DEBUG
+            (*log) << pID << ": sending white token\n";
+#endif
             MPI_Send(&tokCol, 1, MPI_UNSIGNED_CHAR, (pID + 1) % pCount, MSG_TOKEN, MPI_COMM_WORLD);
             holdingToken = false;
         }
