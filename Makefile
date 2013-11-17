@@ -1,12 +1,12 @@
-CC=g++
+CC=mpic++
 ifeq "${VERBOSE}" "yes"
 	VERBOSE2=-D DEBUG
 else
 	VERBOSE2=
 endif
-CFLAGS=-Wall -pedantic -g ${VERBOSE2}
+CFLAGS=-Wall -Wno-long-long -pedantic -g ${VERBOSE2}
 LIBS=
-OBJ=board.o state.o solver.o
+OBJ=board.o state.o solver.o logger.o
 APP=mi-ppr-krs
 
 all: ${APP}
