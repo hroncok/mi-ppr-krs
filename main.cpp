@@ -72,20 +72,22 @@ int main(int argc, char** argv) {
 
     Logger* log = Logger::getInstance(pID, true); //initialize instance of Logger class (singleton)
 
-    if (argc != 5) {
+    //if (argc != 5) {
+    if (argc != 2) {
         (*log) << "Invalid number of arguments\n";
         MPI_Finalize();
         exit(1);
     }
     //parse arguments
     int m = atoi(argv[1]);
-    int n = atoi(argv[2]);
-    int x = atoi(argv[3]);
-    int q = atoi(argv[4]);
+    //int n = atoi(argv[2]);
+    //int x = atoi(argv[3]);
+    //int q = atoi(argv[4]);
 
 
     if (pID == 0) { // main process (master)
-        Board game(m, n, x, q); // create sample game
+        //Board game(m, n, x, q); // create sample game
+        Board game(m); // create test game
         masterSendBoard(game, pCount);
         (*log) << "Initial state:\n";
         game.visualize();

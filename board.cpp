@@ -186,6 +186,48 @@ Board::Board(int m, int n, int x, int q) {
     fill(x, q);
 }
 
+Board::Board(int m) {
+    this->height = 5 + 2 * CORNER_LEN;
+    this->width = 5 + 2 * CORNER_LEN;
+
+    int cells = (height * width) - (CORNER_CELLS * 4);
+    this->mapVagons = cells / MAP_LEN;
+    if (cells % MAP_LEN != 0) mapVagons++;
+    this->map = new unsigned char[mapVagons];
+
+    if (m == 1) {
+        map[0] = 44;
+        map[1] = 144;
+        map[2] = 6;
+        map[3] = 0;
+        map[4] = 160;
+        map[5] = 154;
+        map[6] = 90;
+        map[7] = 0;
+        map[8] = 0;
+    } else if (m == 2) {
+        map[0] = 0;
+        map[1] = 192;
+        map[2] = 128;
+        map[3] = 1;
+        map[4] = 26;
+        map[5] = 128;
+        map[6] = 90;
+        map[7] = 13;
+        map[8] = 0;
+    } else {
+        map[0] = 90;
+        map[1] = 3;
+        map[2] = 0;
+        map[3] = 0;
+        map[4] = 128;
+        map[5] = 26;
+        map[6] = 106;
+        map[7] = 192;
+        map[8] = 0;
+    }
+}
+
 Board::Board(const Board &oldBoard) {
     this->height = oldBoard.height;
     this->width = oldBoard.width;

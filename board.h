@@ -49,6 +49,9 @@ private:
 public:
     /// Constructor with size of the board and number of pins
     Board(int m, int n, int x, int q);
+
+    /// Constructor with preset tests
+    Board(int m);
     
     /// Constructor with another board
     Board(const Board& oldBoard);
