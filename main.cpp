@@ -87,11 +87,13 @@ int main(int argc, char** argv) {
     if (pID == 0) { // main process (master)
         Board game(m, n, x, q); // create sample game
         masterSendBoard(game, pCount);
-                
         (*log) << "Initial state:\n";
         game.visualize();
+        double t1 = MPI_Wtime();
         Solver player(game, pCount, pID); // create master player
         State* result = player.Solve(); //parallel Solve
+        double t2 = MPI_Wtime();
+        (*log) << t2-t1;
         (*log) << "\nFinal state:\n";
         result->getBoard().visualize();
         (*log) << "\n";
